@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Biodata Siswa</title>
+
+<style>
+:root {
+    --primary:#6366f1;
+    --bg:#f4f4f4;
+    --card:#ffffff;
+    --text:#1f2937;
+}
+body.dark {
+    --bg:#0f172a;
+    --card:#1e293b;
+    --text:#f8fafc;
+}
+*{
+    margin:0;padding:0;box-sizing:border-box;
+    font-family:'Segoe UI',sans-serif;
+}
+body{
+    background:var(--bg);
+    color:var(--text);
+    min-height:100vh;
+    transition:.4s;
+}
+.center{
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+.card{
+    background:var(--card);
+    padding:30px;
+    border-radius:20px;
+    width:100%;
+    max-width:380px;
+    text-align:center;
+    box-shadow:0 20px 40px rgba(0,0,0,.15);
+    animation:fadeUp .8s;
+}
+input,textarea{
+    width:100%;
+    padding:12px;
+    margin:8px 0;
+    border-radius:8px;
+    border:1px solid #ccc;
+}
+textarea{resize:none}
+button{
+    width:100%;
+    padding:12px;
+    margin-top:8px;
+    background:var(--primary);
+    border:none;
+    color:white;
+    border-radius:10px;
+    font-weight:bold;
+    cursor:pointer;
+}
+button.secondary{background:#64748b}
+button.danger{background:#ef4444}
+.profile img{
+    width:130px;
+    height:130px;
+    border-radius:50%;
+    object-fit:cover;
+    margin-bottom:10px;
+}
+.profile span{
+    display:block;
+    color:var(--primary);
+    font-weight:600;
+    margin:5px 0;
+}
+.actions{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+    margin-top:10px;
+}
+.theme-btn{
+    position:fixed;
+    top:15px;
+    right:15px;
+    width:45px;
+    height:45px;
+    border-radius:50%;
+}
+.hidden{display:none}
+@keyframes fadeUp{
+    from{opacity:0;transform:translateY(30px)}
+    to{opacity:1;transform:translateY(0)}
+}
+</style>
+</head>
+
+<body>
+
+<button class="theme-btn" onclick="toggleTheme()">🌙</button>
+
+<!-- LOGIN -->
+<section class="center" id="login">
+    <div class="card">
+        <h2>Login</h2>
+        <input type="text" placeholder="Username">
+        <input type="password" placeholder="Password">
+        <button onclick="login()">Masuk</button>
+    </div>
+</section>
+
+<!-- FORM -->
+<section class="center hidden" id="formBio">
+    <div class="card">
+        <h2>Isi Biodata</h2>
+        <input type="file" accept="image/*" onchange="loadFoto(event)">
+        <input type="text" id="nama" placeholder="Nama Lengkap">
+        <input type="text" id="kelas" placeholder="Kelas & Jurusan">
+        <input type="text" id="wa" placeholder="Nomor WhatsApp (08...)">
+        <input type="text" id="github" placeholder="Link GitHub">
+        <textarea id="deskripsi" rows="4" placeholder="Deskripsi singkat"></textarea>
+        <button onclick="simpan()">Simpan Biodata</button>
+    </div>
+</section>
+
+<!-- HASIL -->
+<section class="center hidden" id="hasil">
+    <div class="card profile">
+        <img id="foto">
+        <h2 id="hNama"></h2>
+        <span id="hKelas"></span>
+        <p id="hDesk"></p>
+
+        <div class="actions">
+            <button onclick="hubungi()">WhatsApp</button>
+            <button onclick="hubungi()">link github</button>
+            <button class="secondary" onclick="edit()">Edit</button>
+            <button class="danger" onclick="resetData()">Reset</button>
+        </div>
+    </div>
+</section>
+
+<script>
+let fotoData = "";
+
+window.onload = () => {
+    const data = JSON.parse(localStorage.getItem("biodata"));
+    if(data){
+        tampilkanData(data);
+        document.getElementById("login").classList.add("hidden");
+        document.getElementById("hasil").classList.remove("hidden");
+    }
+};
+
+function login(){
+    document.getElementById("login").classList.add("hidden");
+    document.getElementById("formBio").classList.remove("hidden");
+}
+
+function loadFoto(e){
+    const reader = new FileReader();
+    reader.onload = () => fotoData = reader.result;
+    reader.readAsDataURL(e.target.files[0]);
+}
+
+function simpan(){
+    const data = {
+        nama:nama.value,
+        kelas:kelas.value,
+        wa:wa.value,
+        github:github.value,
+        desk:deskripsi.value,
+        foto:fotoData
+    };
+    localStorage.setItem("biodata", JSON.stringify(data));
+    tampilkanData(data);
+    formBio.classList.add("hidden");
+    hasil.classList.remove("hidden");
+}
+
+function tampilkanData(d){
+    hNama.innerText = d.nama;
+    hKelas.innerText = d.kelas;
+    hDesk.innerText = d.desk;
+    if(d.foto) foto.src = d.foto;
+    waLink = d.wa;
+    gitLink = d.github;
+}
+
+let waLink="", gitLink="";
+
+function edit(){
+    formBio.classList.remove("hidden");
+    hasil.classList.add("hidden");
+}
+
+function resetData(){
+    if(confirm("Hapus biodata?")){
+        localStorage.clear();
+        location.reload();
+    }
+}
+
+function hubungi(){
+    if(waLink) window.open("https://wa.me/62"+waLink.substring(1));
+}
+
+function openGit(){
+    if(gitLink) window.open(gitLink);
+}
+
+function toggleTheme(){
+    document.body.classList.toggle("dark");
+}
+</script>
+
+</body>
+</html>
